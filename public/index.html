@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мессенджер</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #0084ff;
+            --primary-dark: #0066cc;
+            --bg: #ffffff;
+            --bg-secondary: #f0f2f5;
+            --text: #050505;
+            --text-secondary: #65676b;
+            --border: #e4e6eb;
+            --hover: #f0f2f5;
+            --message-bg: #e4e6eb;
+            --my-message: #0084ff;
+            --success: #31a24c;
+            --danger: #e4304e;
+        }
+
+        [data-theme="dark"] {
+            --primary: #0a84ff;
+            --primary-dark: #0066ff;
+            --bg: #18191a;
+            --bg-secondary: #242526;
+            --text: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --border: #3a3b3c;
+            --hover: #3a3b3c;
+            --message-bg: #3a3b3c;
+            --my-message: #0a84ff;
+            --success: #2d9448;
+            --danger: #c9304e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .auth-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-box {
+            background: var(--bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-logo h1 {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .auth-logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.8;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 100%;
+            max-width: 360px;
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .profile-section:hover {
+            background: var(--hover);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            font-size: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: none;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--hover);
+        }
+
+        .search-box {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .chat-item:hover {
+            background: var(--hover);
+        }
+
+        .chat-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-item.active .chat-preview {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-preview {
+            font-size: 13px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        .chat-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-header-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-title {
+            font-weight: 600;
+            font-size: 16px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            max-width: 70%;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.my-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0 12px;
+        }
+
+        .my-message .message-sender {
+            text-align: right;
+        }
+
+        .message-content {
+            background: var(--message-bg);
+            padding: 8px 12px;
+            border-radius: 16px;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .my-message .message-content {
+            background: var(--my-message);
+            color: white;
+        }
+
+        .message-file {
+            background: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-file a {
+            color: inherit;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .message-image, .message-video {
+            max-width: 300px;
+            border-radius: 12px;
+            margin-top: 4px;
+        }
+
+        .message-audio {
+            margin-top: 4px;
+            max-width: 300px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
+        .message-edited-badge {
+            font-size: 11px;
+            opacity: 0.6;
+            font-style: italic;
+            margin-left: 4px;
+        }
+
+        .message-actions {
+            display: none;
+            gap: 4px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .message:hover .message-actions {
+            display: flex;
+        }
+
+        .message-btn {
+            background: rgba(0,0,0,0.1);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .my-message .message-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .reactions {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .reaction {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .input-area {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .input-textarea {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            resize: none;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .input-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            padding: 24px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-list {
+            margin-top: 16px;
+        }
+
+        .user-item {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .user-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-item-name {
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-label:hover {
+            background: var(--hover);
+        }
+
+        .checkbox-label input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .setting-item {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .theme-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .theme-btn {
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .theme-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .recording-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--danger);
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 0 16px 12px;
+        }
+
+        .recording-indicator.active {
+            display: flex;
+        }
+
+        .recording-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .call-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .call-overlay.active {
+            display: flex;
+        }
+
+        .call-info {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .call-name {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .call-status {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+        .call-videos {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .video-wrapper {
+            width: 300px;
+            height: 400px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .call-controls {
+            display: flex;
+            gap: 20px;
+        }
+
+        .call-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .call-btn-end {
+            background: var(--danger);
+            color: white;
+        }
+
+        .call-btn-mute {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+
+        .creator-badge {
+            background: var(--success);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                max-width: 100%;
+            }
+
+            .sidebar.hide-mobile {
+                display: none;
+            }
+
+            .chat-area {
+                display: none;
+            }
+
+            .chat-area.show-mobile {
+                display: flex;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .auth-box {
+                padding: 24px;
+            }
+
+            .video-wrapper {
+                width: 150px;
+                height: 200px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="authScreen" class="auth-screen">
+            <div class="auth-box">
+                <div class="auth-logo">
+                    <h1>💬 Мессенджер</h1>
+                    <p>Общайтесь с друзьями в реальном времени</p>
+                </div>
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" class="form-input" id="authUsername" placeholder="Введите логин">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" class="form-input" id="authPassword" placeholder="Введите пароль">
+                </div>
+                <button class="btn btn-primary" id="loginBtn">Войти</button>
+                <button class="btn btn-secondary" id="registerBtn">Создать аккаунт</button>
+                <div class="error-msg" id="authError"></div>
+            </div>
+        </div>
+
+        <div id="mainApp" class="app-container hidden">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="profile-section" id="profileSection">
+                        <div class="profile-avatar" id="myAvatar"></div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="myUsername"></div>
+                            <div class="profile-status">Онлайн</div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="icon-btn" id="createGroupBtn" title="Создать группу">➕</button>
+                        <button class="icon-btn" id="searchUsersBtn" title="Поиск">🔍</button>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" class="search-input" id="chatSearch" placeholder="Поиск чатов...">
+                </div>
+                <div class="chats-list" id="chatsList"></div>
+            </div>
+
+            <div class="chat-area" id="chatArea">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">💬</div>
+                    <p>Выберите чат чтобы начать общение</p>
+                </div>
+
+                <div id="activeChatContainer" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+                    <div class="chat-header">
+                        <div class="chat-header-left">
+                            <button class="icon-btn" id="backBtn">←</button>
+                            <div class="avatar" id="chatAvatar" style="width: 40px; height: 40px; font-size: 18px;"></div>
+                            <div class="chat-header-info">
+                                <div class="chat-title" id="chatName"></div>
+                                <div class="chat-subtitle" id="chatStatus"></div>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <button class="icon-btn" id="voiceCallBtn" title="Аудио">📞</button>
+                            <button class="icon-btn" id="videoCallBtn" title="Видео">📹</button>
+                            <button class="icon-btn" id="chatMenuBtn" title="Меню">⋮</button>
+                        </div>
+                    </div>
+                    <div class="messages-area" id="messagesArea"></div>
+                    <div class="recording-indicator" id="recordingIndicator">
+                        <div class="recording-dot"></div>
+                        <span id="recordingTime">0:00</span>
+                        <button class="icon-btn" id="stopRecordingBtn" style="background: rgba(255,255,255,0.2); color: white;">⏹</button>
+                    </div>
+                    <div class="input-area">
+                        <button class="icon-btn" id="attachBtn" title="Прикрепить">📎</button>
+                        <button class="icon-btn" id="voiceBtn" title="Голосовое">🎤</button>
+                        <textarea class="input-textarea" id="messageInput" placeholder="Написать сообщение..." rows="1"></textarea>
+                        <button class="send-btn" id="sendBtn">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal" id="searchModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Поиск пользователей</h3>
+                    <button class="modal-close" onclick="closeModal('searchModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="userSearchInput" placeholder="Введите логин...">
+                </div>
+                <div class="user-list" id="searchResults"></div>
+            </div>
+        </div>
+
+        <div class="modal" id="createGroupModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Создать группу</h3>
+                    <button class="modal-close" onclick="closeModal('createGroupModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label>Название группы</label>
+                    <input type="text" class="form-input" id="groupName" placeholder="Введите название">
+                </div>
+                <div class="form-group">
+                    <label>Добавить участников</label>
+                    <input type="text" class="form-input" id="memberSearch" placeholder="Поиск...">
+                </div>
+                <div class="user-list" id="membersList"></div>
+                <button class="btn btn-primary" id="createGroupConfirmBtn">Создать</button>
+            </div>
+        </div>
+
+        <div class="modal" id="settingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Настройки</h3>
+                    <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+                </div>
+                <div class="settings-section">
+                    <h4 class="settings-title">Профиль</h4>
+                    <div class="setting-item">
+                        <label>Аватар</label>
+                        <input type="file" accept="image/*" id="avatarInput">
+                    </div>
+                    <div class="setting-item">
+                        <label>Логин</label>
+                        <input type="text" class="form-input" id="newUsername" placeholder="Новый логин">
+                        <button class="btn btn-primary" id="updateUsernameBtn" style="margin-top: 8px;">Сохранить</button>
+                    </div>
+                    <div class="setting-item">
+                        <label>Пароль</label>
+                        <input type="password" class="form-input" id="newPassword" placeholder="Новый пароль">
+                        <button class="btn btn-primary" id="updatePasswordBtn" style="margin-top: 8px;">Сохранить</button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4 class="settings-title">Тема</h4>
+                    <div class="theme-buttons">
+                        <button class="theme-btn" data-theme="light">☀️ Светлая</button>
+                        <button class="theme-btn" data-theme="dark">🌙 Тёмная</button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <button class="btn btn-primary" id="logoutBtn">Выйти</button>
+                    <button class="btn btn-secondary" id="deleteAccountBtn" style="background: var(--danger); color: white; margin-top: 8px;">Удалить аккаунт</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="chatMenuModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Меню</h3>
+                    <button class="modal-close" onclick="closeModal('chatMenuModal')">×</button>
+                </div>
+                <button class="btn btn-secondary" id="addMembersBtn" style="margin-bottom: 8px;">Добавить участников</button>
+                <button class="btn btn-secondary" id="removeMembersBtn" style="margin-bottom: 8px;">Удалить участников</button>
+                <button class="btn btn-secondary" id="clearChatBtn" style="margin-bottom: 8px;">Очистить историю</button>
+                <button class="btn btn-secondary" id="deleteChatBtn" style="margin-bottom: 8px;">Удалить чат</button>
+                <button class="btn btn-secondary" id="blockUserBtn" style="margin-bottom: 8px;">Заблокировать</button>
+                <button class="btn btn-secondary" id="unblockUserBtn" style="margin-bottom: 8px;">Разблокировать</button>
+                <button class="btn btn-secondary" id="leaveGroupBtn" style="margin-bottom: 8px;">Покинуть группу</button>
+                <button class="btn btn-secondary" id="deleteGroupBtn" style="margin-bottom: 8px;">Удалить группу</button>
+                <button class="btn btn-secondary" id="renameGroupBtn">Переименовать</button>
+            </div>
+        </div>
+
+        <div class="modal" id="addMembersModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Добавить участников</h3>
+                    <button class="modal-close" onclick="closeModal('addMembersModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="addMemberSearch" placeholder="Поиск...">
+                </div>
+                <div class="user-list" id="addMembersList"></div>
+                <button class="btn btn-primary" id="addMembersConfirmBtn">Добавить</button>
+            </div>
+        </div>
+
+        <div class="modal" id="removeMembersModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Удалить участников</h3>
+                    <button class="modal-close" onclick="closeModal('removeMembersModal')">×</button>
+                </div>
+                <div class="user-list" id="removeMembersList"></div>
+            </div>
+        </div>
+
+        <div class="call-overlay" id="callOverlay">
+            <div class="call-info">
+                <div class="call-name" id="callName"></div>
+                <div class="call-status" id="callStatus">Звонок...</div>
+            </div>
+            <div class="call-videos" id="callVideos">
+                <div class="video-wrapper">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                </div>
+                <div class="video-wrapper">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                </div>
+            </div>
+            <div class="call-controls">
+                <button class="call-btn call-btn-mute" id="muteBtn">🔇</button>
+                <button class="call-btn call-btn-end" id="endCallBtn">📵</button>
+            </div>
+        </div>
+
+        <input type="file" id="fileInput" multiple style="display: none;">
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
